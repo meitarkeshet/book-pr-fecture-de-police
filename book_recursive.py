@@ -2,7 +2,7 @@
 # -------------------------------------------------------------------------------------------------------------------------------------
 
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.keys import Keys # for interacting with page (clicks, etc.)
 # for waits:
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -18,10 +18,10 @@ from selenium.webdriver.chrome.options import Options
 import random
 # for loading sound directly in python (not working?)
 from playsound import playsound
-# for openning sound file from computer
+# for openning sound file from computer -------------------> download an alarm sound of your choosing and change the path
 import os
 alarm = "C:\\Users\\meita\\Documents\\auto reservation\\fire.wav"
-# for opening the web browser
+# for opening the web browser -------------------> download the 'chromedriver' that matches your chrome version and change path
 PATH = "C:\\Program Files (x86)\\chromedriver.exe"
 driver = webdriver.Chrome(PATH)
 # for voicing errors 
@@ -58,21 +58,21 @@ def cookies():
     # accept cookies
     element = WebDriverWait(driver, 90).until(
         EC.presence_of_element_located((By.LINK_TEXT, 'Accepter')))
-    element.click()
+    element.click() # mouse click to accept cookies and close the pop-up bar
     print("cockies")
 
 def loop_reserve():
-    print("SCANNING: FIRST PAGE")
+    print("SCANNING: FIRST PAGE") # looking at the main page with all the details about the meeting you want to set
     # check for http Errors
     check_badgateway()
 
-    # click checkbox to accept conditions
+    # click checkbox to accept conditions - buttom left of page
     element = WebDriverWait(driver, 120).until(
         EC.presence_of_element_located((By.XPATH, '//*[@id="condition"]')))
     element.click()
     print("CLICKED: CHECKBOX")
 
-    # accept and move the the next page
+    # accept and move the the next page - where you would book if there were vacant time slots
     link = WebDriverWait(driver, 120).until(
         EC.presence_of_element_located((By.XPATH, '//*[@id="submit_Booking"]/input[1]')))
     link.click()
@@ -82,8 +82,8 @@ def loop_reserve():
     # check for http Errors:
     check_badgateway()
     
-    # if there are no places - restart
-    noGood = "Il n\'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement."
+    # if there are no vacant time slots - start over
+    noGood = "Il n\'existe plus de plage horaire libre pour votre demande de rendez-vous. Veuillez recommencer ultérieurement." # the text that appears one there are no openings  
     soup = driver.page_source
     
     if soup.find(noGood):
@@ -91,29 +91,29 @@ def loop_reserve():
         # accept and move the the next page
         link = WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.XPATH, '//*[@id="submit_Booking"]/input')))
-        time.sleep(random.randint(3, 20))
+        time.sleep(random.randint(3, 20)) # be kind and wait - to not overload the server
         link.click()
         print("\nCLICKED BACK TO FIRST PAGE\n")
         loop_reserve() 
-    else:
+    else: # if found booking option
         i = 0 
         while i < 500:
-            speak.Speak("APPOINTMENT"*3)
+            speak.Speak("APPOINTMENT"*3) # sound indication  
             playsound(alarm)  
-            print("\nFOUND - FOUND - FOUND\n"*5)
+            print("\nFOUND - FOUND - FOUND\n"*5) # text indication
             i = i + 1
-            time.sleep(10)
+            time.sleep(10) # give option to shut down code while typing in the computer (the noise is delibertly annoying)
         
-def book():
+def book(): # the Main function tying together all sub functions
     try:
-        driver.get("http://pprdv.interieur.gouv.fr/booking/create/953")
+        driver.get("http://pprdv.interieur.gouv.fr/booking/create/953") # -------------------> change to the link to the depertment and service that are intresting for you
         check_badgateway()
         cookies()
         loop_reserve()
     finally:
-        #speak.Speak(" CODE CRASHED "*3)
-        print("\nCODE CRASHED\n")
-        print(datetime.datetime.now(),"\n")
+        speak.Speak(" CODE CRASHED "*3) # sound indication
+        print("\nCODE CRASHED\n") # text indication
+        print(datetime.datetime.now(),"\n") # know when the code crashed / finished
 # Let's find an appointment
 # -------------------------------------------------------------------------------------------------------------------------------------
-book() 
+book() # runs the main function
